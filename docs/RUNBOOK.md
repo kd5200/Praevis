@@ -30,9 +30,29 @@ make up
 | `make test-security` | Security-focused tests |
 | `make lint` | Ruff lint |
 | `make typecheck` | mypy + web tsc |
-| `make migrate` | Alembic upgrade (Phase 2+) |
-| `make seed` | Seed data (Phase 2+) |
+| `make migrate` | Alembic upgrade head |
+| `make seed` | Seed data (placeholder) |
 | `make clean` | Remove caches and build artifacts |
+
+## Migrations
+
+With Postgres running (`make up`):
+
+```bash
+make migrate
+```
+
+Uses `DATABASE_URL` from the environment (default host port `15432`).
+
+## Dashboard
+
+```bash
+make up && make migrate
+make api   # :8000
+make web   # :3000
+```
+
+Open http://localhost:3000 to submit URLs and review scan results.
 
 ## Health checks
 

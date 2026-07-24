@@ -1,26 +1,25 @@
 # Handoff
 
-**Updated:** 2026-07-24 (Phase 1 complete)
+**Updated:** 2026-07-24 (Phase 3 complete)
 
 ## Recommended next task
 
-**Phase 2 start:** Define SQLAlchemy models (`Scan`, `Finding`, `RetrievedContent`), Alembic migration scaffolding, and `POST /v1/scans` that creates a `queued` scan record (pipeline stages can still be stubs). Follow with URL normalization unit tests.
+**Phase 4 — Worker execution:** Enqueue scans on Redis/Celery when `wait_for_completion=false`, process the pipeline in `apps/worker`, support status polling from API/dashboard, keep sync mode for local demos.
 
 ## Verify environment
 
 ```bash
-cp .env.example .env   # if needed; default Postgres host port is 15432
-make setup
-make up
+make up && make migrate
+make api    # terminal 1
+make web    # terminal 2
+# open http://localhost:3000
 make test
-curl -s http://localhost:8000/health
-curl -s http://localhost:8000/ready
 ```
 
 ## Notes for the next agent
 
-- Read root `AGENTS.md`, `agent/STATUS.md`, `docs/DECISIONS.md`, `docs/TASKS.md` before coding.
-- Do not fetch uncontrolled public websites in tests; introduce fixture server/mocks with SSRF defenses.
-- Keep scan pipeline stages framework-independent (callable from API sync path and Celery later).
-- Codename Praevis is temporary; keep branding easy to replace.
-- Raw content must not be dumped unrestricted into Postgres — design a storage interface early.
+- Dashboard lives in `apps/web` (`/` and `/scans/[scanId]`).
+- Submit uses a server action calling `POST /v1/scans` with `wait_for_completion=true`.
+- Async queued scans still need Phase 4 worker wiring before the UI should advertise async mode.
+- Do not point automated tests at uncontrolled public websites.
+- Codename Praevis remains replaceable via `NEXT_PUBLIC_APP_NAME` / `APP_NAME`.

@@ -49,10 +49,10 @@ typecheck:
 	cd apps/web && npm run typecheck
 
 migrate:
-	@echo "Alembic migrations land in Phase 2. No-op for Phase 1."
+	cd apps/api && DATABASE_URL=$${DATABASE_URL:-postgresql+psycopg://praevis:praevis@localhost:15432/praevis} python3 -m alembic upgrade head
 
 seed:
-	@echo "Seed data lands in Phase 2. No-op for Phase 1."
+	@echo "No seed data defined yet."
 
 clean:
 	find . -type d -name __pycache__ -not -path './.git/*' -prune -exec rm -rf {} +

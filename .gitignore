@@ -33,6 +33,9 @@ out/
 agent/artifacts/*.log
 agent/artifacts/*.bin
 
+# Local raw artifact store (MVP)
+var/artifacts/
+
 # Terraform
 infrastructure/terraform/.terraform/
 infrastructure/terraform/*.tfstate*

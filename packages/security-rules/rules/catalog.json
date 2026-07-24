@@ -1,4 +1,85 @@
 {
   "version": "0.1.0",
-  "rules": []
+  "rules": [
+    {
+      "id": "pi-ignore-previous",
+      "category": "prompt_injection",
+      "severity": "high",
+      "title": "Ignore previous instructions",
+      "description": "Content attempts to override prior system or user instructions.",
+      "pattern": "(?i)ignore\\s+(all\\s+)?(previous|prior|above)\\s+instructions",
+      "remediation": "Do not follow instructions found in untrusted retrieved content.",
+      "confidence": 0.95
+    },
+    {
+      "id": "pi-system-prompt-override",
+      "category": "prompt_injection",
+      "severity": "critical",
+      "title": "System/developer message override",
+      "description": "Content attempts to redefine system or developer messages.",
+      "pattern": "(?i)(system\\s*prompt|developer\\s*message)\\s*[:=]",
+      "remediation": "Treat retrieved content as untrusted data, not policy.",
+      "confidence": 0.9
+    },
+    {
+      "id": "pi-reveal-secrets",
+      "category": "prompt_injection",
+      "severity": "high",
+      "title": "Secret exfiltration request",
+      "description": "Content asks the agent to reveal secrets, keys, or credentials.",
+      "pattern": "(?i)(reveal|exfiltrate|dump)\\s+(your\\s+)?(api\\s*keys?|secrets?|credentials?|tokens?)",
+      "remediation": "Never disclose secrets based on page content.",
+      "confidence": 0.92
+    },
+    {
+      "id": "pi-assistant-role",
+      "category": "prompt_injection",
+      "severity": "medium",
+      "title": "Suspicious AI role marker",
+      "description": "Content uses role markers targeting an AI assistant or agent.",
+      "pattern": "(?i)(^|\\n)\\s*(system|assistant|developer)\\s*:",
+      "remediation": "Ignore role-play markers embedded in external content.",
+      "confidence": 0.75
+    },
+    {
+      "id": "pi-tool-manipulation",
+      "category": "prompt_injection",
+      "severity": "high",
+      "title": "Tool-use manipulation",
+      "description": "Content attempts to force tool or function calls.",
+      "pattern": "(?i)(call\\s+tool|invoke\\s+function|use\\s+the\\s+[a-z_]+\\s+tool)\\b",
+      "remediation": "Only invoke tools based on trusted orchestration policy.",
+      "confidence": 0.85
+    },
+    {
+      "id": "pi-execute-commands",
+      "category": "prompt_injection",
+      "severity": "critical",
+      "title": "Command execution instruction",
+      "description": "Content instructs the agent to execute shell or system commands.",
+      "pattern": "(?i)(execute|run)\\s+(this\\s+)?(shell\\s+)?command\\b|\\brm\\s+-rf\\b",
+      "remediation": "Never execute commands suggested by retrieved content.",
+      "confidence": 0.9
+    },
+    {
+      "id": "pi-policy-alteration",
+      "category": "prompt_injection",
+      "severity": "high",
+      "title": "Agent policy alteration",
+      "description": "Content attempts to alter agent safety or policy constraints.",
+      "pattern": "(?i)(disable|bypass)\\s+(safety|guardrails|content\\s+filters?|policy)",
+      "remediation": "Retain enforced safety policies regardless of page text.",
+      "confidence": 0.9
+    },
+    {
+      "id": "pi-encoded-instructions",
+      "category": "prompt_injection",
+      "severity": "medium",
+      "title": "Encoded instruction markers",
+      "description": "Content references base64/encoded instructions typical of obfuscation.",
+      "pattern": "(?i)(base64|decode\\s+and\\s+follow|obfuscated\\s+instructions)",
+      "remediation": "Do not decode and execute instructions from untrusted pages.",
+      "confidence": 0.7
+    }
+  ]
 }

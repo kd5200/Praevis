@@ -1,0 +1,53 @@
+"use client";
+
+import { useFormStatus } from "react-dom";
+import { useActionState } from "react";
+
+import { submitScanAction, type SubmitState } from "@/app/actions";
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="rounded-md bg-accent px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-wait disabled:opacity-60"
+    >
+      {pending ? "Scanning…" : "Inspect URL"}
+    </button>
+  );
+}
+
+const initial: SubmitState = {};
+
+export function ScanForm() {
+  const [state, action] = useActionState(submitScanAction, initial);
+
+  return (
+    <form action={action} className="space-y-3">
+      <label className="block text-sm font-medium text-ink" htmlFor="url">
+        URL to inspect
+      </label>
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <input
+          id="url"
+          name="url"
+          type="url"
+          required
+          placeholder="https://example.com/article"
+          className="w-full flex-1 rounded-md border border-ink/15 bg-white px-3 py-2.5 text-sm text-ink outline-none ring-accent/30 placeholder:text-ink-muted/70 focus:ring-2"
+        />
+        <SubmitButton />
+      </div>
+      {state.error ? (
+        <p className="text-sm text-red-700" role="alert">
+          {state.error}
+        </p>
+      ) : (
+        <p className="text-xs text-ink-muted">
+          Runs a synchronous scan via the gateway. Prefer fixture or controlled URLs in demos.
+        </p>
+      )}
+    </form>
+  );
+}

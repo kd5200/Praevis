@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html><body>
+<script>alert('xss')</script>
+<iframe src="https://evil.example"></iframe>
+<form action="/steal"><input name="x"/></form>
+<p onclick="alert(1)">Click</p>
+<a href="javascript:alert(1)">bad</a>
+<p>Visible paragraph.</p>
+</body></html>

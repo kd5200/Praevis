@@ -17,11 +17,33 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     log_json: bool = True
 
-    database_url: str = "postgresql+psycopg://praevis:praevis@localhost:5432/praevis"
+    database_url: str = "postgresql+psycopg://praevis:praevis@localhost:15432/praevis"
     redis_url: str = "redis://localhost:6379/0"
 
     # Readiness probes may skip dependency checks in unit tests.
     ready_check_dependencies: bool = True
+
+    # CORS — comma-separated origins for local dashboard / SDKs
+    cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
+
+    # Fetch / security
+    http_timeout_connect_seconds: float = 5.0
+    http_timeout_read_seconds: float = 10.0
+    http_max_response_bytes: int = 2_097_152
+    http_max_redirects: int = 5
+    http_user_agent: str = "PraevisSecurityGateway/0.1 (+https://example.local/praevis)"
+    http_allowed_content_types: str = "text/html,application/xhtml+xml,text/plain"
+
+    # Artifact storage (local MVP; later object storage)
+    artifact_storage_backend: str = "local"
+    artifact_storage_path: str = "var/artifacts"
+
+    # Scoring thresholds
+    risk_block_threshold: int = 70
+    risk_warn_threshold: int = 40
+
+    # Security rules
+    security_rules_path: str = "packages/security-rules/rules/catalog.json"
 
 
 @lru_cache

@@ -4,6 +4,50 @@ Format: short ADRs. Newest first.
 
 ---
 
+## ADR-0009 — Dashboard uses server actions + server fetch
+
+**Date:** 2026-07-24  
+**Status:** Accepted
+
+**Decision:** The Next.js dashboard submits scans via a server action and loads list/detail via server-side fetch to the API. CORS is still enabled on the API for browser/SDK clients.
+
+**Rationale:** Avoids relying on browser CORS for core flows; keeps credentials and base URL handling on the server.
+
+---
+
+## ADR-0008 — BeautifulSoup + lxml for HTML sanitize/extract
+
+**Date:** 2026-07-24  
+**Status:** Accepted
+
+**Decision:** Use BeautifulSoup with the `lxml` parser for HTML extraction and sanitization. Do not execute JavaScript.
+
+**Rationale:** Deterministic, testable, sufficient for MVP sanitization.
+
+---
+
+## ADR-0007 — Raw artifacts behind storage interface
+
+**Date:** 2026-07-24  
+**Status:** Accepted
+
+**Decision:** Persist only sanitized text/HTML metadata in Postgres. Store raw bodies via `RawArtifactStore` (`memory` for tests, `local` filesystem for MVP). References are stored on `RetrievedContent.raw_content_reference`.
+
+**Rationale:** Avoid unrestricted raw HTML in the primary DB; leave room for encrypted object storage + retention.
+
+---
+
+## ADR-0006 — In-process sync scan pipeline (Phase 2)
+
+**Date:** 2026-07-24  
+**Status:** Accepted
+
+**Decision:** When `wait_for_completion=true`, run the framework-independent pipeline inside the API process. `wait_for_completion=false` creates a `queued` scan (worker execution in Phase 4).
+
+**Rationale:** Delivers a complete vertical slice without blocking on Celery job wiring.
+
+---
+
 ## ADR-0005 — Default host Postgres port 15432
 
 **Date:** 2026-07-24  

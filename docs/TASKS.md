@@ -22,25 +22,25 @@ Track acceptance-oriented work. Agents update status honestly.
 
 | ID | Task | Status |
 |----|------|--------|
-| P2-01 | DB models + Alembic migrations | pending |
-| P2-02 | URL submission API | pending |
-| P2-03 | URL normalization | pending |
-| P2-04 | Destination validation / SSRF protections | pending |
-| P2-05 | Safe HTTP fetcher (mocked transports in tests) | pending |
-| P2-06 | HTML extraction + sanitization | pending |
-| P2-07 | Prompt-injection rules package | pending |
-| P2-08 | Deterministic scoring engine | pending |
-| P2-09 | Persist scan results | pending |
-| P2-10 | Return completed scan via API | pending |
+| P2-01 | DB models + Alembic migrations | done |
+| P2-02 | URL submission API | done |
+| P2-03 | URL normalization | done |
+| P2-04 | Destination validation / SSRF protections | done |
+| P2-05 | Safe HTTP fetcher (mocked transports in tests) | done |
+| P2-06 | HTML extraction + sanitization | done |
+| P2-07 | Prompt-injection rules package | done |
+| P2-08 | Deterministic scoring engine | done |
+| P2-09 | Persist scan results | done |
+| P2-10 | Return completed scan via API | done |
 
 ## Phase 3 — Dashboard
 
 | ID | Task | Status |
 |----|------|--------|
-| P3-01 | Scan submission form | pending |
-| P3-02 | Scan status / result views | pending |
-| P3-03 | Findings, scores, decision, content, provenance | pending |
-| P3-04 | Wire dashboard to API | pending |
+| P3-01 | Scan submission form | done |
+| P3-02 | Scan status / result views | done |
+| P3-03 | Findings, scores, decision, content, provenance | done |
+| P3-04 | Wire dashboard to API | done |
 
 ## Phase 4 — Worker execution
 

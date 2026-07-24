@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+
+import { AppHeader } from "@/components/AppHeader";
+import { getAppName } from "@/lib/config";
+
 import "./globals.css";
 
 const geistSans = Geist({
@@ -12,7 +16,7 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
 });
 
-const appName = process.env.NEXT_PUBLIC_APP_NAME ?? "Praevis";
+const appName = getAppName();
 
 export const metadata: Metadata = {
   title: `${appName} — Security gateway`,
@@ -23,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
+        <AppHeader />
         {children}
       </body>
     </html>

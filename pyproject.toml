@@ -57,5 +57,5 @@ namespace_packages = true
 explicit_package_bases = true
 
 [[tool.mypy.overrides]]
-module = ["celery.*", "redis.*"]
+module = ["celery.*", "redis.*", "bs4.*", "bs4"]
 ignore_missing_imports = true
