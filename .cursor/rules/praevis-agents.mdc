@@ -1,0 +1,14 @@
+---
+description: Praevis agent delivery rules — always orient from repo memory files
+alwaysApply: true
+---
+
+# Praevis agent rules
+
+Before changing code: read root `AGENTS.md`, `agent/STATUS.md`, `docs/DECISIONS.md`, `docs/TASKS.md`, and relevant docs/tests.
+
+After meaningful sessions: update `agent/STATUS.md`, `docs/TASKS.md`, `docs/DECISIONS.md` (if needed), `agent/runs/`, and `agent/HANDOFF.md`.
+
+Do not commit secrets, weaken SSRF/safety checks, execute scanned-page JavaScript, or add LLMs where deterministic rules suffice.
+
+Codename `Praevis` is temporary — keep branding easy to replace.

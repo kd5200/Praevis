@@ -1,0 +1,75 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: praevis-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-praevis}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-praevis}
+      POSTGRES_DB: ${POSTGRES_DB:-praevis}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - praevis_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-praevis} -d ${POSTGRES_DB:-praevis}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: praevis-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - praevis_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Optional application services (compose --profile apps)
+  api:
+    profiles: ["apps"]
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.api
+    container_name: praevis-api
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://praevis:praevis@postgres:5432/praevis
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+    ports:
+      - "${API_PORT:-8000}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    profiles: ["apps"]
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.worker
+    container_name: praevis-worker
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://praevis:praevis@postgres:5432/praevis
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  praevis_pg_data:
+  praevis_redis_data:

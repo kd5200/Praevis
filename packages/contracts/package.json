@@ -1,0 +1,6 @@
+{
+  "name": "@praevis/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Shared API/domain contracts (stub)"
+}

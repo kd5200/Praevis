@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --app-name: "Praevis";
+  --bg: #f7f5f1;
+  --ink: #1a2332;
+  --accent: #0f6b5c;
+}
+
+body {
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 600px at 10% -10%, #d8ebe6 0%, transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, #e8e2d6 0%, transparent 50%),
+    var(--bg);
+  min-height: 100vh;
+}
