@@ -48,11 +48,15 @@ Uses `DATABASE_URL` from the environment (default host port `15432`).
 
 ```bash
 make up && make migrate
-make api   # :8000
-make web   # :3000
+make api      # :8000
+make worker   # async scans
+make web      # :3000
 ```
 
 Open http://localhost:3000 to submit URLs and review scan results.
+
+- Sync (default): leave "Wait for completion" checked.
+- Async: uncheck it, ensure `make worker` is running, and the detail page will poll until finished.
 
 ## Health checks
 
@@ -66,7 +70,14 @@ curl -s http://localhost:8000/ready
 - **Port in use:** Change ports in `.env`. Default host Postgres mapping is `15432` to avoid clashes with local Postgres on `5432`.
 - **Ready fails:** Ensure `make up` is running and `DATABASE_URL` / `REDIS_URL` match Compose.
 - **Python version:** Prefer running API via Docker image `python:3.12` if host lacks 3.12.
+- **429 rate_limited:** Raise `RATE_LIMIT_PER_MINUTE` or set `0` to disable locally.
+- **413 request_too_large:** Raise `MAX_REQUEST_BODY_BYTES`.
+- **Async scans stuck in queued:** Ensure `make worker` is running and Redis is healthy.
+
+## Request correlation
+
+API responses include `X-Request-ID` and `X-Response-Time-Ms`. Pass your own `X-Request-ID` to correlate client and server logs.
 
 ## Security note
 
-Do not point automated tests at arbitrary public URLs. Use fixtures and mocks. Never commit real secrets; use `.env` locally only.
+Do not point automated tests at arbitrary public URLs. Use fixtures under `tests/fixtures/` and `tests/malicious-pages/`, plus mocked HTTP transports. Never commit real secrets; use `.env` locally only.

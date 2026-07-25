@@ -28,9 +28,15 @@ export function ProvenancePanel({
         </dd>
       </div>
       <div>
-        <dt className="text-xs uppercase tracking-wide text-ink-muted">Content hash</dt>
+        <dt className="text-xs uppercase tracking-wide text-ink-muted">Original content hash</dt>
         <dd className="mt-1 break-all font-mono text-xs text-ink">
-          {provenance?.content_hash ?? "—"}
+          {provenance?.original_content_hash ?? provenance?.content_hash ?? "—"}
+        </dd>
+      </div>
+      <div>
+        <dt className="text-xs uppercase tracking-wide text-ink-muted">Sanitized content hash</dt>
+        <dd className="mt-1 break-all font-mono text-xs text-ink">
+          {provenance?.sanitized_content_hash ?? "—"}
         </dd>
       </div>
       <div className="sm:col-span-2">

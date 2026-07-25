@@ -19,6 +19,9 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql+psycopg://praevis:praevis@localhost:15432/praevis"
     redis_url: str = "redis://localhost:6379/0"
+    celery_broker_url: str = "redis://localhost:6379/0"
+    celery_result_backend: str = "redis://localhost:6379/1"
+    celery_task_always_eager: bool = False
 
     # Readiness probes may skip dependency checks in unit tests.
     ready_check_dependencies: bool = True
@@ -44,6 +47,11 @@ class Settings(BaseSettings):
 
     # Security rules
     security_rules_path: str = "packages/security-rules/rules/catalog.json"
+
+    # Request limits (Phase 5)
+    rate_limit_per_minute: int = 60  # 0 disables
+    max_request_body_bytes: int = 65_536
+    max_url_length: int = 2048
 
 
 @lru_cache

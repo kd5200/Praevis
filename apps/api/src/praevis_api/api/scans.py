@@ -6,11 +6,18 @@ import uuid
 from typing import Annotated
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, Query, Request, status
 from sqlalchemy.orm import Session
 
 from praevis_api.core.config import Settings, get_settings
+from praevis_api.core.errors import (
+    CONTENT_NOT_FOUND,
+    SCAN_NOT_FOUND,
+    VALIDATION_ERROR,
+    AppError,
+)
 from praevis_api.db.session import get_db
+from praevis_api.observability.metrics import metrics
 from praevis_api.schemas.scans import FindingOut, ScanCreateRequest, ScanListOut, ScanOut
 from praevis_api.services import scans as scan_service
 from praevis_api.storage.artifacts import RawArtifactStore, build_artifact_store
@@ -34,6 +41,13 @@ def create_scan(
     artifact_store: Annotated[RawArtifactStore, Depends(get_artifact_store)],
     transport: Annotated[httpx.BaseTransport | None, Depends(get_http_transport)],
 ) -> ScanOut:
+    if len(body.url) > settings.max_url_length:
+        raise AppError(
+            code=VALIDATION_ERROR,
+            message=f"URL exceeds max length of {settings.max_url_length}",
+            status_code=422,
+        )
+    metrics.incr("scans_created")
     scan = scan_service.create_and_run_scan(
         db,
         url=body.url,
@@ -62,7 +76,7 @@ def list_scans(
 def get_scan(scan_id: uuid.UUID, db: Annotated[Session, Depends(get_db)]) -> ScanOut:
     scan = scan_service.get_scan(db, scan_id)
     if scan is None:
-        raise HTTPException(status_code=404, detail="scan_not_found")
+        raise AppError(code=SCAN_NOT_FOUND, message="Scan not found", status_code=404)
     return scan_service.scan_to_schema(scan)
 
 
@@ -70,7 +84,7 @@ def get_scan(scan_id: uuid.UUID, db: Annotated[Session, Depends(get_db)]) -> Sca
 def get_findings(scan_id: uuid.UUID, db: Annotated[Session, Depends(get_db)]) -> list[FindingOut]:
     scan = scan_service.get_scan(db, scan_id)
     if scan is None:
-        raise HTTPException(status_code=404, detail="scan_not_found")
+        raise AppError(code=SCAN_NOT_FOUND, message="Scan not found", status_code=404)
     return scan_service.scan_to_schema(scan).findings
 
 
@@ -78,8 +92,8 @@ def get_findings(scan_id: uuid.UUID, db: Annotated[Session, Depends(get_db)]) ->
 def get_content(scan_id: uuid.UUID, db: Annotated[Session, Depends(get_db)]) -> dict[str, object]:
     scan = scan_service.get_scan(db, scan_id)
     if scan is None:
-        raise HTTPException(status_code=404, detail="scan_not_found")
+        raise AppError(code=SCAN_NOT_FOUND, message="Scan not found", status_code=404)
     out = scan_service.scan_to_schema(scan)
     if out.content is None:
-        raise HTTPException(status_code=404, detail="content_not_found")
+        raise AppError(code=CONTENT_NOT_FOUND, message="Content not found", status_code=404)
     return out.content.model_dump()

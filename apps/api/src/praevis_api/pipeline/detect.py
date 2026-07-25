@@ -45,12 +45,20 @@ def load_rules(path: str) -> tuple[DetectorRule, ...]:
     return tuple(rules)
 
 
+def _normalize_for_detection(text: str) -> str:
+    """Normalize invisible/obfuscation characters before rule matching."""
+
+    cleaned = re.sub(r"[\u200b\u200c\u200d\ufeff]", " ", text)
+    return re.sub(r"[ \t]+", " ", cleaned)
+
+
 def _match_text(
     text: str, rules: tuple[DetectorRule, ...], *, source: str
 ) -> list[PipelineFinding]:
     findings: list[PipelineFinding] = []
+    normalized = _normalize_for_detection(text)
     for rule in rules:
-        match = rule.pattern.search(text)
+        match = rule.pattern.search(normalized)
         if not match:
             continue
         evidence = match.group(0)

@@ -5,6 +5,7 @@ import { ContentPanel } from "@/components/ContentPanel";
 import { DecisionBadge } from "@/components/DecisionBadge";
 import { FindingsPanel } from "@/components/FindingsPanel";
 import { ProvenancePanel } from "@/components/ProvenancePanel";
+import { ScanStatusPoller } from "@/components/ScanStatusPoller";
 import { ScorePanel } from "@/components/ScorePanel";
 import { ApiError, getScan } from "@/lib/api";
 
@@ -37,7 +38,7 @@ export default async function ScanDetailPage({ params }: PageProps) {
 
       <section className="mt-6">
         <div className="flex flex-wrap items-center gap-3">
-          <DecisionBadge decision={scan.decision} />
+          <DecisionBadge decision={scan.decision} status={scan.status} />
           <span className="rounded-md bg-ink/5 px-2 py-1 font-mono text-xs text-ink-muted">
             {scan.status}
           </span>
@@ -46,6 +47,7 @@ export default async function ScanDetailPage({ params }: PageProps) {
           {scan.submitted_url}
         </h1>
         <p className="mt-2 font-mono text-xs text-ink-muted">scan_id {scan.scan_id}</p>
+        <ScanStatusPoller scanId={scan.scan_id} initialStatus={scan.status} />
         {scan.error_message ? (
           <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
             {scan.error_code ? `${scan.error_code}: ` : ""}

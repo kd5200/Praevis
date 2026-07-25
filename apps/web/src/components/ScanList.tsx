@@ -37,7 +37,7 @@ export function ScanList({ scans }: { scans: Scan[] }) {
               <span className="text-ink-muted">
                 risk {scan.risk_score ?? "—"} / trust {scan.trust_score ?? "—"}
               </span>
-              <DecisionBadge decision={scan.decision} />
+              <DecisionBadge decision={scan.decision} status={scan.status} />
             </div>
           </Link>
         </li>

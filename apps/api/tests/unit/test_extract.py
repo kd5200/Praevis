@@ -1,8 +1,11 @@
 """Sanitization / extraction tests."""
 
 from pathlib import Path
+from unittest.mock import MagicMock
 
-from praevis_api.pipeline.extract import extract_content, sanitize_html
+from bs4 import Tag
+
+from praevis_api.pipeline.extract import _attr_str, _is_hidden, extract_content, sanitize_html
 
 REPO = Path(__file__).resolve().parents[4]
 
@@ -16,6 +19,26 @@ def test_sanitize_removes_script_and_handlers() -> None:
     assert "onclick" not in cleaned.lower()
     assert "javascript:" not in cleaned.lower()
     assert "Visible paragraph" in cleaned
+
+
+def test_sanitize_handles_hidden_and_svg() -> None:
+    raw = """
+    <html><body>
+      <div style="display:none">secret</div>
+      <p>Visible</p>
+      <svg><g></g></svg>
+    </body></html>
+    """
+    cleaned = sanitize_html(raw)
+    assert "secret" not in cleaned.lower()
+    assert "Visible" in cleaned
+
+
+def test_attr_helpers_tolerate_none_attrs() -> None:
+    tag = MagicMock(spec=Tag)
+    tag.attrs = None
+    assert _attr_str(tag, "style") == ""
+    assert _is_hidden(tag) is False
 
 
 def test_extract_safe_article() -> None:

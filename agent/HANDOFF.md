@@ -1,25 +1,24 @@
 # Handoff
 
-**Updated:** 2026-07-24 (Phase 3 complete)
+**Updated:** 2026-07-24 (Phase 5 complete — initial MVP milestone done)
 
 ## Recommended next task
 
-**Phase 4 — Worker execution:** Enqueue scans on Redis/Celery when `wait_for_completion=false`, process the pipeline in `apps/worker`, support status polling from API/dashboard, keep sync mode for local demos.
+Post-MVP: pick from `docs/ROADMAP.md` later items — e.g. encrypted object storage for raw artifacts, auth/multi-tenant, distributed rate limiting, production Terraform modules, or SDK expansion. Alternatively run a full local demo rehearsal and capture gaps.
 
 ## Verify environment
 
 ```bash
 make up && make migrate
-make api    # terminal 1
-make web    # terminal 2
-# open http://localhost:3000
+make api && make worker && make web   # separate terminals
 make test
+make test-security
 ```
 
 ## Notes for the next agent
 
-- Dashboard lives in `apps/web` (`/` and `/scans/[scanId]`).
-- Submit uses a server action calling `POST /v1/scans` with `wait_for_completion=true`.
-- Async queued scans still need Phase 4 worker wiring before the UI should advertise async mode.
-- Do not point automated tests at uncontrolled public websites.
-- Codename Praevis remains replaceable via `NEXT_PUBLIC_APP_NAME` / `APP_NAME`.
+- Initial Phases 1–5 acceptance criteria are met per `docs/TASKS.md`.
+- Security fixtures live under `tests/malicious-pages/`.
+- API errors use `{error:{code,message,request_id}}`.
+- Do not weaken SSRF checks or hit uncontrolled public sites in automated tests.
+- Codename Praevis remains replaceable.

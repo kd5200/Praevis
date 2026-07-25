@@ -33,6 +33,7 @@ class Scan(Base):
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     request_metadata: Mapped[dict[str, Any] | None] = mapped_column(JSONType, nullable=True)
     content_hash: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    sanitized_content_hash: Mapped[str | None] = mapped_column(String(128), nullable=True)
     error_code: Mapped[str | None] = mapped_column(String(64), nullable=True)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     redirect_chain: Mapped[list[Any] | None] = mapped_column(JSONType, nullable=True)

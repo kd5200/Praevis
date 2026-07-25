@@ -16,6 +16,7 @@ from praevis_api.db.enums import ScanStatus
 from praevis_api.pipeline.detect import run_security_detectors
 from praevis_api.pipeline.extract import extract_content
 from praevis_api.pipeline.fetch import FetchError, fetch_resource
+from praevis_api.pipeline.integrity import sha256_digest
 from praevis_api.pipeline.normalize import UrlNormalizationError, normalize_url
 from praevis_api.pipeline.score import calculate_scores
 from praevis_api.pipeline.types import PipelineFinding, PipelineResult
@@ -113,6 +114,7 @@ def run_scan_pipeline(
 
         stage = "extract_content"
         extracted = extract_content(fetched.body, fetched.content_type)
+        sanitized_content_hash = sha256_digest(extracted.text)
 
         stage = "run_security_detectors"
         rules_path = _resolve_rules_path(settings)
@@ -164,6 +166,7 @@ def run_scan_pipeline(
             content_type=fetched.content_type,
             score_explanation=scores.explanation,
             retrieved_at=fetched.retrieved_at,
+            sanitized_content_hash=sanitized_content_hash,
         )
     except (UrlNormalizationError, DestinationValidationError, FetchError) as exc:
         logger.warning(
@@ -223,4 +226,5 @@ def run_scan_pipeline(
             score_explanation=scores.explanation,
             error_code=code,
             error_message=message,
+            sanitized_content_hash=None,
         )

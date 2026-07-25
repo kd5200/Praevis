@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from praevis_api.core.config import get_settings
+from praevis_api.core.rate_limit import rate_limiter
 from praevis_api.db.base import Base
 from praevis_api.db.session import get_db, reset_engine
 from praevis_api.main import create_app
@@ -62,6 +63,14 @@ def client(
     monkeypatch.setenv("READY_CHECK_DEPENDENCIES", "false")
     monkeypatch.setenv("ARTIFACT_STORAGE_BACKEND", "memory")
     monkeypatch.setenv("SECURITY_RULES_PATH", str(RULES_PATH))
+    monkeypatch.setenv("CELERY_TASK_ALWAYS_EAGER", "false")
+    monkeypatch.setenv("RATE_LIMIT_PER_MINUTE", "0")
+    rate_limiter.reset()
+    # Avoid Redis during unit/integration tests unless a test opts into enqueue.
+    monkeypatch.setattr(
+        "praevis_api.services.scans.enqueue_process_scan",
+        lambda scan_id: f"mock-task-{scan_id}",
+    )
     get_settings.cache_clear()
     reset_engine()
 

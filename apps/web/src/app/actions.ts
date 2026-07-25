@@ -17,8 +17,10 @@ export async function submitScanAction(
     return { error: "Enter a URL to inspect." };
   }
 
+  const waitForCompletion = formData.get("wait_for_completion") === "true";
+
   try {
-    const scan = await createScan(url, true);
+    const scan = await createScan(url, waitForCompletion);
     redirect(`/scans/${scan.scan_id}`);
   } catch (error) {
     if (error instanceof ApiError) {

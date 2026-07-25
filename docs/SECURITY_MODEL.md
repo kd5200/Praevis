@@ -43,3 +43,13 @@ Deterministic, explainable risk and trust scores (category weights, severity mul
 ## Testing
 
 Automated tests must not rely on uncontrolled public websites. Use fixture servers or mocked HTTP transports. Malicious fixtures live under `tests/malicious-pages/` and `tests/fixtures/`.
+
+Representative fixtures include direct/hidden prompt injection, tool manipulation, encoded instructions, role markers, zero-width obfuscation, and command-execution instructions.
+
+## API hardening (MVP)
+
+- Structured error envelope with stable `error.code` values
+- Per-client scan-create rate limit (in-process; not distributed)
+- Request body size limit via `Content-Length`
+- Request id + timing headers on responses
+- Detector normalization strips/replaces zero-width characters before matching

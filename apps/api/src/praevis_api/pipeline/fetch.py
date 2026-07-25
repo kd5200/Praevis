@@ -9,6 +9,7 @@ from urllib.parse import urljoin, urlparse
 
 import httpx
 
+from praevis_api.pipeline.fixtures import FixtureError, load_fixture_bytes
 from praevis_api.pipeline.normalize import UrlNormalizationError, normalize_url
 from praevis_api.pipeline.types import FetchResult
 from praevis_api.pipeline.validate_destination import (
@@ -45,6 +46,29 @@ def fetch_resource(
     """Fetch URL with SSRF-safe redirect following. Does not execute JavaScript."""
 
     current = normalize_url(url).normalized
+    if current.startswith("fixture://"):
+        try:
+            body, content_type, _path = load_fixture_bytes(current)
+        except FixtureError as exc:
+            raise FetchError(exc.code, exc.message) from exc
+        if len(body) > max_bytes:
+            raise FetchError("response_too_large", "Fixture exceeds size limit")
+        if not _content_type_allowed(content_type, allowed_content_types):
+            raise FetchError(
+                "unsupported_content_type",
+                f"Content type {content_type!r} is not allowed",
+            )
+        digest = hashlib.sha256(body).hexdigest()
+        return FetchResult(
+            final_url=current,
+            status_code=200,
+            content_type=content_type,
+            body=body,
+            redirect_chain=[],
+            retrieved_at=datetime.now(UTC),
+            content_hash=f"sha256:{digest}",
+        )
+
     redirect_chain: list[str] = []
     timeout = httpx.Timeout(connect_timeout, read=read_timeout)
     headers = {

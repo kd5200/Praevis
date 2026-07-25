@@ -1,32 +1,33 @@
 # Project status
 
 **Last updated:** 2026-07-24  
-**Active phase:** Phase 3 — Dashboard (**complete**)  
+**Active phase:** Phase 5 — Hardening (**complete**)  
 **Codename:** Praevis (replaceable)
 
 ## Summary
 
-Phase 3 adds a minimal operational Next.js dashboard: URL submission, recent scans list, and scan detail views (decision, risk/trust, findings, sanitized content, provenance). API CORS is enabled for the local web origin; the dashboard primarily uses server-side fetch / server actions.
+MVP vertical slice is hardened: expanded malicious fixtures/regressions, structured API errors, request-id/timing middleware, configurable rate/body limits, detector zero-width normalization, and docs/runbook updates. All five planned phases for the initial milestone are complete.
 
 ## Completed
 
 - Phase 1 foundation
 - Phase 2 backend vertical slice
-- Phase 3 dashboard (P3-01 … P3-04)
+- Phase 3 dashboard
+- Phase 4 worker execution
+- Phase 5 hardening (P5-01 … P5-06)
 
 ## In progress
 
 - None
 
-## Not started
+## Not started / later
 
-- Phase 4: Worker job processing for async scans
-- Phase 5: Hardening extras
+- Production Terraform, distributed rate limits, object storage for raw artifacts, auth/multi-tenant, optional LLM classifiers (post-MVP roadmap)
 
 ## Environment notes
 
-- Web: http://localhost:3000 (`make web`)
-- API: http://localhost:8000 (`make api`)
+- `make test` / `make test-security`
+- Limits: `RATE_LIMIT_PER_MINUTE`, `MAX_REQUEST_BODY_BYTES`, `MAX_URL_LENGTH`
 - Postgres host port **15432**; Redis **6379**
 
 ## Blockers

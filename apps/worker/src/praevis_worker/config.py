@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     celery_broker_url: str = "redis://localhost:6379/0"
     celery_result_backend: str = "redis://localhost:6379/1"
+    database_url: str = "postgresql+psycopg://praevis:praevis@localhost:15432/praevis"
 
 
 @lru_cache

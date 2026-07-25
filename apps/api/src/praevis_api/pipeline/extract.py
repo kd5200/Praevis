@@ -16,7 +16,10 @@ _UNSAFE_SCHEMES = {"javascript", "vbscript", "data"}
 
 
 def _attr_str(tag: Tag, name: str) -> str:
-    value = tag.get(name)
+    attrs = getattr(tag, "attrs", None)
+    if not attrs:
+        return ""
+    value = attrs.get(name)
     if value is None:
         return ""
     if isinstance(value, list):
@@ -25,6 +28,8 @@ def _attr_str(tag: Tag, name: str) -> str:
 
 
 def _is_hidden(tag: Tag) -> bool:
+    if getattr(tag, "attrs", None) is None:
+        return False
     style = _attr_str(tag, "style").lower().replace(" ", "")
     if "display:none" in style or "visibility:hidden" in style or "opacity:0" in style:
         return True
@@ -60,6 +65,9 @@ def sanitize_html(raw_html: str) -> str:
         comment.extract()
     for tag in list(soup.find_all(True)):
         if not isinstance(tag, Tag):
+            continue
+        # Decomposed / malformed nodes can have attrs=None on some parsers.
+        if getattr(tag, "attrs", None) is None:
             continue
         if _is_hidden(tag):
             tag.decompose()

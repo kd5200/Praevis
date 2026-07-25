@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import uuid
 from datetime import UTC, datetime
 
@@ -10,17 +11,28 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from praevis_api.core.config import Settings
+from praevis_api.core.logging import log_extra
 from praevis_api.db.enums import ScanStatus
 from praevis_api.db.models import Finding, RetrievedContent, Scan
+from praevis_api.jobs.celery_client import enqueue_process_scan
 from praevis_api.pipeline.runner import run_scan_pipeline
 from praevis_api.pipeline.types import PipelineResult
 from praevis_api.schemas.scans import (
     ContentOut,
     FindingOut,
+    IntegrityOut,
     ProvenanceOut,
     ScanOut,
 )
-from praevis_api.storage.artifacts import RawArtifactStore
+from praevis_api.storage.artifacts import RawArtifactStore, build_artifact_store
+
+logger = logging.getLogger(__name__)
+
+TERMINAL_STATUSES = {
+    ScanStatus.COMPLETED.value,
+    ScanStatus.BLOCKED.value,
+    ScanStatus.FAILED.value,
+}
 
 
 def _apply_pipeline_result(scan: Scan, result: PipelineResult, session: Session) -> None:
@@ -31,6 +43,7 @@ def _apply_pipeline_result(scan: Scan, result: PipelineResult, session: Session)
     scan.trust_score = result.trust_score
     scan.decision = result.decision
     scan.content_hash = result.content_hash
+    scan.sanitized_content_hash = result.sanitized_content_hash
     scan.redirect_chain = result.redirect_chain
     scan.score_explanation = result.score_explanation
     scan.error_code = result.error_code
@@ -94,7 +107,16 @@ def scan_to_schema(scan: Scan, *, include_content: bool = True) -> ScanOut:
     provenance = ProvenanceOut(
         retrieved_at=scan.completed_at,
         content_hash=scan.content_hash,
+        original_content_hash=scan.content_hash,
+        sanitized_content_hash=scan.sanitized_content_hash,
         redirect_chain=list(scan.redirect_chain or []),
+        requested_url=scan.submitted_url,
+        normalized_url=scan.normalized_url,
+        final_url=scan.final_url,
+    )
+    integrity = IntegrityOut(
+        original_content_hash=scan.content_hash,
+        sanitized_content_hash=scan.sanitized_content_hash,
     )
     return ScanOut(
         scan_id=scan.id,
@@ -108,12 +130,82 @@ def scan_to_schema(scan: Scan, *, include_content: bool = True) -> ScanOut:
         findings=findings,
         content=content,
         provenance=provenance,
+        integrity=integrity,
         score_explanation=scan.score_explanation,
         error_code=scan.error_code,
         error_message=scan.error_message,
         created_at=scan.created_at,
         completed_at=scan.completed_at,
     )
+
+
+def process_existing_scan(
+    session: Session,
+    scan_id: uuid.UUID,
+    *,
+    settings: Settings,
+    artifact_store: RawArtifactStore | None = None,
+    transport: httpx.BaseTransport | None = None,
+) -> Scan:
+    """Run the pipeline for an existing scan row (sync or worker)."""
+
+    scan = session.get(Scan, scan_id)
+    if scan is None:
+        raise ValueError(f"scan_not_found:{scan_id}")
+
+    if scan.status in TERMINAL_STATUSES:
+        return scan
+
+    store = artifact_store or build_artifact_store(
+        settings.artifact_storage_backend,
+        settings.artifact_storage_path,
+    )
+    mode = "standard"
+    if isinstance(scan.request_metadata, dict):
+        mode = str(scan.request_metadata.get("mode") or "standard")
+
+    scan.status = ScanStatus.VALIDATING.value
+    if scan.started_at is None:
+        scan.started_at = datetime.now(UTC)
+    session.commit()
+
+    logger.info(
+        "processing scan",
+        extra=log_extra(
+            scan_id=str(scan.id), pipeline_stage="validate_destination", outcome="started"
+        ),
+    )
+
+    try:
+        result = run_scan_pipeline(
+            scan.submitted_url,
+            settings=settings,
+            artifact_store=store,
+            transport=transport,
+            request_metadata={"mode": mode},
+        )
+    except Exception as exc:  # noqa: BLE001 — never leave scans stuck mid-pipeline
+        logger.exception(
+            "scan pipeline crashed",
+            extra=log_extra(scan_id=str(scan.id), pipeline_stage="pipeline", outcome="error"),
+        )
+        scan.status = ScanStatus.FAILED.value
+        scan.error_code = "pipeline_error"
+        scan.error_message = f"{type(exc).__name__}: {exc}"[:500]
+        scan.completed_at = datetime.now(UTC)
+        session.add(scan)
+        session.commit()
+        session.refresh(scan)
+        return scan
+
+    _apply_pipeline_result(scan, result, session)
+    logger.info(
+        "scan processed",
+        extra=log_extra(
+            scan_id=str(scan.id), pipeline_stage="finalize_decision", outcome=result.decision
+        ),
+    )
+    return scan
 
 
 def create_and_run_scan(
@@ -125,6 +217,7 @@ def create_and_run_scan(
     settings: Settings,
     artifact_store: RawArtifactStore,
     transport: httpx.BaseTransport | None = None,
+    enqueue: bool = True,
 ) -> Scan:
     scan = Scan(
         submitted_url=url,
@@ -136,21 +229,38 @@ def create_and_run_scan(
     session.commit()
     session.refresh(scan)
 
-    if not wait_for_completion:
-        # Phase 4 will enqueue worker jobs; for now leave queued.
-        return scan
+    if wait_for_completion:
+        return process_existing_scan(
+            session,
+            scan.id,
+            settings=settings,
+            artifact_store=artifact_store,
+            transport=transport,
+        )
 
-    scan.status = ScanStatus.VALIDATING.value
-    session.commit()
-
-    result = run_scan_pipeline(
-        url,
-        settings=settings,
-        artifact_store=artifact_store,
-        transport=transport,
-        request_metadata={"mode": mode},
-    )
-    _apply_pipeline_result(scan, result, session)
+    if enqueue:
+        if settings.celery_task_always_eager:
+            # Local/test helper: run pipeline inline without a worker process.
+            return process_existing_scan(
+                session,
+                scan.id,
+                settings=settings,
+                artifact_store=artifact_store,
+                transport=transport,
+            )
+        try:
+            task_id = enqueue_process_scan(str(scan.id))
+            meta = dict(scan.request_metadata or {})
+            meta["celery_task_id"] = task_id
+            scan.request_metadata = meta
+            session.add(scan)
+            session.commit()
+            session.refresh(scan)
+        except Exception:  # noqa: BLE001 — leave queued; operator can retry/requeue
+            logger.exception(
+                "failed to enqueue scan",
+                extra=log_extra(scan_id=str(scan.id), outcome="enqueue_failed"),
+            )
     return scan
 
 

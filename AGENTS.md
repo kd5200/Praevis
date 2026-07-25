@@ -4,12 +4,12 @@ Working codename: **Praevis**. Treat branding as replaceable; prefer config cons
 
 ## Mission
 
-Praevis is a security gateway between AI agents and untrusted external information. Agents submit a URL (and later other artifact types) and receive sanitized content, security findings, provenance, and a trust assessment before using that content in reasoning.
+Praevis is **provenance-preserving secure retrieval infrastructure for AI agents**. Agents submit a URL (and later other artifact types) and receive sanitized content, security findings, provenance, integrity hashes, and a trust assessment before using that content in reasoning.
 
 Core interaction:
 
 ```text
-AI agent → Praevis security gateway → external internet resource
+AI agent → Praevis secure retrieval → external internet resource
 ```
 
 In enforced mode, the agent must not directly consume unknown web content.

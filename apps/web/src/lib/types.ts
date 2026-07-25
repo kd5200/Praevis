@@ -22,7 +22,17 @@ export type ScanContent = {
 export type Provenance = {
   retrieved_at?: string | null;
   content_hash?: string | null;
+  original_content_hash?: string | null;
+  sanitized_content_hash?: string | null;
   redirect_chain: string[];
+  requested_url?: string | null;
+  normalized_url?: string | null;
+  final_url?: string | null;
+};
+
+export type Integrity = {
+  original_content_hash?: string | null;
+  sanitized_content_hash?: string | null;
 };
 
 export type Scan = {
@@ -37,6 +47,7 @@ export type Scan = {
   findings: Finding[];
   content?: ScanContent | null;
   provenance?: Provenance | null;
+  integrity?: Integrity | null;
   score_explanation?: Record<string, unknown> | null;
   error_code?: string | null;
   error_message?: string | null;

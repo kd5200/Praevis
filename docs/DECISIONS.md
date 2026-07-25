@@ -4,6 +4,48 @@ Format: short ADRs. Newest first.
 
 ---
 
+## ADR-0012 — Refined product position: provenance-preserving secure retrieval
+
+**Date:** 2026-07-25  
+**Status:** Accepted
+
+**Context:** Phases 1–5 delivered a working “AI security gateway” MVP (URL scan → findings → scores → decision → dashboard/worker). Broader platform language (firewall, MCP governance, browser isolation, agent-action security) risked scope drift.
+
+**Decision:** Position Praevis as **provenance-preserving secure retrieval infrastructure for AI agents**. The core transaction is: validate destination → controlled retrieve → inspect (cyber + AI-specific) → sanitize/extract → content-risk + source-trust scores → versioned policy → return sanitized content, provenance, and an audit/integrity receipt.
+
+**Core (own):** retrieval security orchestration, AI content inspection orchestration, sanitization, dual scoring, provenance/integrity, policy orchestration, framework-neutral API.
+
+**Defer (do not delete reusable work):** full AI firewall, MCP governance, secure web gateway replacement, global browser isolation, proprietary AV/TI network, agent identity platform, downstream agent-action security, billing, deep multi-tenant admin.
+
+**Preserve-first:** Keep the existing sync pipeline, SSRF fetcher, detectors, dashboard, and Celery worker. Evolve the `/v1/scans` contract additively toward a retrieval-receipt shape; do not rewrite working modules for naming alone. MCP / Copilot Studio / OpenAI tools attach as **adapters** to the same retrieval API.
+
+**First optimization increment:** Dual content integrity hashes (`original_content_hash` + `sanitized_content_hash`) on the existing scan response (`integrity` + enriched `provenance`), with Alembic `0002_sanitized_hash`.
+
+---
+
+## ADR-0011 — In-process rate limit + structured API errors
+
+
+**Date:** 2026-07-24  
+**Status:** Accepted
+
+**Decision:** Enforce scan-create rate limits with an in-process sliding window and return structured `{error:{code,message,request_id}}` payloads. Metrics/tracing use a null interface stub for later backends.
+
+**Rationale:** Adequate for local/MVP hardening without introducing a distributed rate-limit dependency. Can be replaced with Redis/gateway limits later.
+
+---
+
+## ADR-0010 — Worker reuses API pipeline via Celery task
+
+**Date:** 2026-07-24  
+**Status:** Accepted
+
+**Decision:** Async scans enqueue Celery task `praevis.worker.process_scan`. The worker imports `praevis_api.services.scans.process_existing_scan` so pipeline stages stay single-sourced. Sync mode still runs in-process when `wait_for_completion=true`. `CELERY_TASK_ALWAYS_EAGER` processes async requests inline for local/debug without a worker.
+
+**Rationale:** Avoid duplicating pipeline logic; keep framework-independent stages callable from API or worker.
+
+---
+
 ## ADR-0009 — Dashboard uses server actions + server fetch
 
 **Date:** 2026-07-24  

@@ -36,6 +36,11 @@ def test_create_scan_safe_article(client: TestClient) -> None:
     assert data["submitted_url"] == "https://example.com/article"
     assert data["content"]["title"] == "Safe Example Article"
     assert data["provenance"]["content_hash"].startswith("sha256:")
+    assert data["provenance"]["original_content_hash"] == data["provenance"]["content_hash"]
+    assert data["provenance"]["sanitized_content_hash"].startswith("sha256:")
+    assert data["integrity"]["original_content_hash"] == data["provenance"]["content_hash"]
+    assert data["integrity"]["sanitized_content_hash"] == data["provenance"]["sanitized_content_hash"]
+    assert data["integrity"]["original_content_hash"] != data["integrity"]["sanitized_content_hash"]
     assert data["decision"] in {"allow", "warn", "block"}
     scan_id = data["scan_id"]
 
@@ -81,10 +86,31 @@ def test_blocked_localhost_url(client: TestClient) -> None:
     }
 
 
-def test_async_mode_leaves_queued(client: TestClient) -> None:
+def test_async_mode_enqueues_and_stays_queued(client: TestClient) -> None:
     response = client.post(
         "/v1/scans",
         json={"url": "https://example.com/later", "wait_for_completion": False},
     )
     assert response.status_code == 201
-    assert response.json()["status"] == "queued"
+    data = response.json()
+    assert data["status"] == "queued"
+    detail = client.get(f"/v1/scans/{data['scan_id']}")
+    assert detail.status_code == 200
+    assert detail.json()["status"] == "queued"
+
+
+def test_async_eager_processes_inline(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    from praevis_api.core.config import get_settings
+
+    monkeypatch.setenv("CELERY_TASK_ALWAYS_EAGER", "true")
+    get_settings.cache_clear()
+    _install_transport(client, SAFE)
+    response = client.post(
+        "/v1/scans",
+        json={"url": "https://example.com/eager", "wait_for_completion": False},
+    )
+    assert response.status_code == 201
+    data = response.json()
+    assert data["status"] in {"completed", "blocked"}
+    assert data["content"] is not None
+    get_settings.cache_clear()

@@ -35,9 +35,24 @@ def normalize_url(raw: str) -> NormalizedUrl:
         raise UrlNormalizationError("url_malformed", "URL must include scheme and host")
 
     scheme = parsed.scheme.lower()
+    if scheme == "fixture":
+        # Demo-only local fixtures: fixture://direct-prompt-injection.html
+        name = (parsed.netloc + parsed.path).strip("/")
+        if not name or "/" in name or ".." in name:
+            raise UrlNormalizationError("fixture_invalid", "Fixture name must be a single filename")
+        normalized = f"fixture://{name}"
+        return NormalizedUrl(
+            original=candidate,
+            normalized=normalized,
+            scheme="fixture",
+            host="fixture",
+            port=None,
+            path=f"/{name}",
+        )
+
     if scheme not in {"http", "https"}:
         raise UrlNormalizationError(
-            "url_unsupported_scheme", "Only http and https URLs are allowed"
+            "url_unsupported_scheme", "Only http, https, and fixture URLs are allowed"
         )
 
     if parsed.username is not None or parsed.password is not None:

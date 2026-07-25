@@ -12,7 +12,9 @@ from praevis_api import __version__
 from praevis_api.api.health import router as health_router
 from praevis_api.api.scans import router as scans_router
 from praevis_api.core.config import get_settings
+from praevis_api.core.exception_handlers import register_exception_handlers
 from praevis_api.core.logging import configure_logging
+from praevis_api.core.middleware import RequestContextMiddleware
 
 
 @asynccontextmanager
@@ -38,6 +40,9 @@ def create_app() -> FastAPI:
             allow_methods=["*"],
             allow_headers=["*"],
         )
+    # Middleware is applied last-added-first; request context should wrap outermost after CORS.
+    application.add_middleware(RequestContextMiddleware)
+    register_exception_handlers(application)
     application.include_router(health_router)
     application.include_router(scans_router)
     return application

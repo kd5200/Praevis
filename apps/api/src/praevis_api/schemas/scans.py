@@ -36,8 +36,20 @@ class ContentOut(BaseModel):
 
 class ProvenanceOut(BaseModel):
     retrieved_at: datetime | None = None
-    content_hash: str | None = None
+    content_hash: str | None = None  # original retrieved body; prefer integrity.original
+    original_content_hash: str | None = None
+    sanitized_content_hash: str | None = None
     redirect_chain: list[str] = Field(default_factory=list)
+    requested_url: str | None = None
+    normalized_url: str | None = None
+    final_url: str | None = None
+
+
+class IntegrityOut(BaseModel):
+    """Content integrity fields for agent retrieval receipts."""
+
+    original_content_hash: str | None = None
+    sanitized_content_hash: str | None = None
 
 
 class ScanOut(BaseModel):
@@ -52,6 +64,7 @@ class ScanOut(BaseModel):
     findings: list[FindingOut] = Field(default_factory=list)
     content: ContentOut | None = None
     provenance: ProvenanceOut | None = None
+    integrity: IntegrityOut | None = None
     score_explanation: dict[str, Any] | None = None
     error_code: str | None = None
     error_message: str | None = None

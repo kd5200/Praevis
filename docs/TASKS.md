@@ -46,18 +46,33 @@ Track acceptance-oriented work. Agents update status honestly.
 
 | ID | Task | Status |
 |----|------|--------|
-| P4-01 | Redis-backed job processing | pending |
-| P4-02 | Move slow ops to worker | pending |
-| P4-03 | Polling scan status | pending |
-| P4-04 | Preserve sync mode for local testing | pending |
+| P4-01 | Redis-backed job processing | done |
+| P4-02 | Move slow ops to worker | done |
+| P4-03 | Polling scan status | done |
+| P4-04 | Preserve sync mode for local testing | done |
 
 ## Phase 5 — Hardening
 
 | ID | Task | Status |
 |----|------|--------|
-| P5-01 | Expand security fixtures | pending |
-| P5-02 | Regression tests | pending |
-| P5-03 | Request limits | pending |
-| P5-04 | Structured error codes | pending |
-| P5-05 | Logging and timing | pending |
-| P5-06 | Docs and runbook update | pending |
+| P5-01 | Expand security fixtures | done |
+| P5-02 | Regression tests | done |
+| P5-03 | Request limits | done |
+| P5-04 | Structured error codes | done |
+| P5-05 | Logging and timing | done |
+| P5-06 | Docs and runbook update | done |
+
+## Phase 6 — Retrieval-position optimization (in progress)
+
+Align the repo with ADR-0012 (secure retrieval + provenance/integrity receipts) without rewriting the working pipeline.
+
+| ID | Task | Status |
+|----|------|--------|
+| P6-01 | Audit + optimization plan (keep/harden/extend/migrate/defer) | done |
+| P6-02 | Dual integrity hashes (original + sanitized) on scan receipt | done |
+| P6-03 | Sanitization transformation records | todo |
+| P6-04 | Versioned policy decision layer (separate from scoring) | todo |
+| P6-05 | Nested content_risk / source_trust score objects (compat aliases) | todo |
+| P6-06 | Source-span / citation preservation (minimal) | todo |
+| P6-07 | Expand SSRF/redirect regression matrix | todo |
+| P6-08 | Agent/request context fields (additive) | todo |
