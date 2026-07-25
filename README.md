@@ -1,6 +1,6 @@
 # Praevis
 
-Working codename for an **AI security gateway**: submit a URL, receive sanitized content, security findings, provenance, and a trust assessment before AI agents consume untrusted web data.
+Working codename for **provenance-preserving secure retrieval** for AI agents: submit a URL, receive sanitized content, security findings, provenance, integrity hashes, and a trust assessment before agents consume untrusted web data.
 
 ```text
 AI agent → Praevis security gateway → external internet resource

@@ -1,5 +1,9 @@
 # Architecture — Praevis
 
+## Product contract
+
+Praevis provides **provenance-preserving secure retrieval** for AI agents (ADR-0012). Framework integrations (MCP, Copilot Studio, OpenAI tools) are adapters to the HTTP retrieval API — not the core domain.
+
 ## High-level
 
 ```text

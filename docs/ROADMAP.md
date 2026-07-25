@@ -20,6 +20,19 @@ Redis-backed jobs, async polling, keep sync mode for local testing.
 
 Security fixtures, regression tests, request limits, structured errors, logging/timing, docs/runbook polish.
 
-## Later (post-MVP)
+## Phase 6 — Retrieval-position optimization (active)
 
-Object storage for raw artifacts, multi-tenant auth, additional content types (docs/files/APIs), optional LLM classifiers, production Terraform, metrics/tracing backends, SDKs beyond stubs, distributed rate limiting.
+Refine product around secure retrieval + receipts (ADR-0012). Preserve working pipeline; additive API evolution.
+
+1. ~~Audit + plan~~
+2. ~~Dual integrity hashes~~
+3. Transformation records
+4. Versioned policy layer
+5. Nested content_risk / source_trust (compat aliases)
+6. Minimal source-span / citation preservation
+7. SSRF/redirect regression matrix expansion
+8. Additive agent/request context
+
+## Later (post-MVP / deferred)
+
+Object storage for raw artifacts, multi-tenant auth, additional content types (docs/files/APIs), optional LLM classifiers, production Terraform, metrics/tracing backends, SDKs beyond stubs, distributed rate limiting, MCP/framework adapters, browser-rendered retrieval providers.

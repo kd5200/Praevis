@@ -1,33 +1,33 @@
 # Project status
 
-**Last updated:** 2026-07-24  
-**Active phase:** Phase 5 — Hardening (**complete**)  
+**Last updated:** 2026-07-25  
+**Active phase:** Phase 6 — Retrieval-position optimization (**P6-02 done**; further P6 tasks open)  
 **Codename:** Praevis (replaceable)
 
 ## Summary
 
-MVP vertical slice is hardened: expanded malicious fixtures/regressions, structured API errors, request-id/timing middleware, configurable rate/body limits, detector zero-width normalization, and docs/runbook updates. All five planned phases for the initial milestone are complete.
+Phases 1–5 MVP remains intact. Scope refined (ADR-0012): Praevis is provenance-preserving **secure retrieval** infrastructure, not a broad AI firewall/MCP platform. First optimization increment shipped: dual integrity hashes (`original_content_hash` + `sanitized_content_hash`) on scan responses, Alembic `0002_sanitized_hash`.
 
 ## Completed
 
-- Phase 1 foundation
-- Phase 2 backend vertical slice
-- Phase 3 dashboard
-- Phase 4 worker execution
-- Phase 5 hardening (P5-01 … P5-06)
+- Phase 1–5 initial MVP
+- P6-01 audit / preserve-first plan
+- P6-02 integrity hashes + API `integrity` object
 
 ## In progress
 
-- None
+- Phase 6 remaining tasks (transformations, policy layer, nested scores, spans, SSRF matrix, agent context)
 
-## Not started / later
+## Not started / deferred
 
-- Production Terraform, distributed rate limits, object storage for raw artifacts, auth/multi-tenant, optional LLM classifiers (post-MVP roadmap)
+- Production Terraform, distributed rate limits, object storage, auth/multi-tenant, LLM classifiers
+- MCP/Copilot Studio deep integrations (adapters later)
+- Browser isolation, proprietary AV/TI, agent-action security platform
 
 ## Environment notes
 
 - `make test` / `make test-security`
-- Limits: `RATE_LIMIT_PER_MINUTE`, `MAX_REQUEST_BODY_BYTES`, `MAX_URL_LENGTH`
+- After pull: `make migrate` (includes `0002_sanitized_hash`)
 - Postgres host port **15432**; Redis **6379**
 
 ## Blockers

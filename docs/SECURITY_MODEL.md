@@ -28,7 +28,7 @@ Rules-based detectors in `packages/security-rules` before any LLM classifier. Fi
 
 ## Sanitization
 
-Remove scripts, event handlers, iframes, forms, embeds, unsafe URLs, and hidden content where appropriate. Primary AI-consumable output is plain text; optional restricted sanitized HTML. Preserve provenance (source URL, content hash).
+Remove scripts, event handlers, iframes, forms, embeds, unsafe URLs, and hidden content where appropriate. Primary AI-consumable output is plain text; optional restricted sanitized HTML. Preserve provenance (source URL, redirect chain) and integrity (original body hash + sanitized text hash).
 
 ## Scoring
 

@@ -1,10 +1,13 @@
 # Handoff
 
-**Updated:** 2026-07-24 (Phase 5 complete — initial MVP milestone done)
+**Updated:** 2026-07-25 (ADR-0012 + P6-02 integrity hashes)
 
 ## Recommended next task
 
-Post-MVP: pick from `docs/ROADMAP.md` later items — e.g. encrypted object storage for raw artifacts, auth/multi-tenant, distributed rate limiting, production Terraform modules, or SDK expansion. Alternatively run a full local demo rehearsal and capture gaps.
+**P6-03 — Sanitization transformation records**  
+Extend `extract.sanitize_html` / `extract_content` to emit structured transformation records (e.g. `{type, target, reason, count}`), persist on the scan (JSON column or content metadata), and expose under `integrity.transformations` (or a sibling field). Keep the existing sanitize behavior; do not rewrite BeautifulSoup usage.
+
+Alternatively, if security gaps are higher priority: **P6-07** expand SSRF/redirect regression tests before changing fetch.
 
 ## Verify environment
 
@@ -17,8 +20,8 @@ make test-security
 
 ## Notes for the next agent
 
-- Initial Phases 1–5 acceptance criteria are met per `docs/TASKS.md`.
-- Security fixtures live under `tests/malicious-pages/`.
-- API errors use `{error:{code,message,request_id}}`.
+- Read ADR-0012 before expanding scope. Preserve-first: reuse pipeline; evolve `/v1/scans` additively.
+- `content_hash` / `integrity.original_content_hash` = raw body; `sanitized_content_hash` = sanitized plain text.
+- Dashboard is low priority; API + integrity/provenance are highest leverage.
 - Do not weaken SSRF checks or hit uncontrolled public sites in automated tests.
 - Codename Praevis remains replaceable.
