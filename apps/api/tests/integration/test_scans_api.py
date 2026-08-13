@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 
 REPO = Path(__file__).resolve().parents[4]
 SAFE = (REPO / "tests/fixtures/safe-article.html").read_bytes()
+UNSAFE = (REPO / "tests/fixtures/malformed-unsafe.html").read_bytes()
 INJECT = (REPO / "tests/malicious-pages/direct-prompt-injection.html").read_bytes()
 
 
@@ -41,6 +42,7 @@ def test_create_scan_safe_article(client: TestClient) -> None:
     assert data["integrity"]["original_content_hash"] == data["provenance"]["content_hash"]
     assert data["integrity"]["sanitized_content_hash"] == data["provenance"]["sanitized_content_hash"]
     assert data["integrity"]["original_content_hash"] != data["integrity"]["sanitized_content_hash"]
+    assert data["integrity"]["transformations"] == []
     assert data["decision"] in {"allow", "warn", "block"}
     scan_id = data["scan_id"]
 
@@ -53,6 +55,23 @@ def test_create_scan_safe_article(client: TestClient) -> None:
     listing = client.get("/v1/scans")
     assert listing.status_code == 200
     assert listing.json()["total"] >= 1
+
+
+def test_create_scan_unsafe_html_includes_transformations(client: TestClient) -> None:
+    _install_transport(client, UNSAFE)
+    response = client.post(
+        "/v1/scans",
+        json={"url": "https://example.com/unsafe", "wait_for_completion": True},
+    )
+    assert response.status_code == 201
+    data = response.json()
+    transformations = data["integrity"]["transformations"]
+    assert transformations
+    targets = {t["target"] for t in transformations if t["type"] == "removed_element"}
+    assert "script" in targets
+    assert "iframe" in targets
+    assert "form" in targets
+    assert any(t["type"] == "removed_attribute" for t in transformations)
 
 
 @pytest.mark.security

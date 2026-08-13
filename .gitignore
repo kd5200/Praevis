@@ -29,12 +29,21 @@ out/
 .vscode/
 *.swp
 
-# Agent local artifacts (keep structure; ignore noisy dumps)
-agent/artifacts/*.log
-agent/artifacts/*.bin
-
 # Local raw artifact store (MVP)
 var/artifacts/
+
+# Local agent session state (do not commit; keep on disk)
+agent/HANDOFF.md
+agent/STATUS.md
+agent/plans/
+agent/runs/
+agent/artifacts/
+
+# Local planning / sprint tracking (product docs stay in docs/)
+docs/TASKS.md
+docs/ROADMAP.md
+docs/SPRINTS.md
+docs/PIPELINE_ACCEPTANCE.md
 
 # Terraform
 infrastructure/terraform/.terraform/

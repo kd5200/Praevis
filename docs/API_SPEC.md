@@ -71,7 +71,15 @@ GET /health
   },
   "integrity": {
     "original_content_hash": "sha256:...",
-    "sanitized_content_hash": "sha256:..."
+    "sanitized_content_hash": "sha256:...",
+    "transformations": [
+      {
+        "type": "removed_element",
+        "target": "script",
+        "reason": "active_content_not_allowed",
+        "count": 1
+      }
+    ]
   }
 }
 ```
@@ -80,7 +88,8 @@ Notes:
 
 - `provenance.content_hash` remains the **original retrieved body** hash (backward compatible).
 - `integrity.original_content_hash` mirrors that value; `integrity.sanitized_content_hash` is over sanitized plain text.
-- Future receipt fields (transformations, policy_version, detector_versions, nested scores, agent context) will evolve additively; see ADR-0012.
+- `integrity.transformations` lists sanitization operations (`removed_element`, `removed_attribute`, `removed_unsafe_url`, `removed_comment`). Empty list `[]` when no HTML sanitization occurred.
+- Future receipt fields (policy_version, detector_versions, nested scores, agent context) will evolve additively; see ADR-0012.
 
 ## Statuses
 

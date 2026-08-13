@@ -48,6 +48,7 @@ def _apply_pipeline_result(scan: Scan, result: PipelineResult, session: Session)
     scan.score_explanation = result.score_explanation
     scan.error_code = result.error_code
     scan.error_message = result.error_message
+    scan.transformations = [t.to_dict() for t in result.transformations]
     scan.completed_at = datetime.now(UTC)
 
     scan.findings.clear()
@@ -117,6 +118,7 @@ def scan_to_schema(scan: Scan, *, include_content: bool = True) -> ScanOut:
     integrity = IntegrityOut(
         original_content_hash=scan.content_hash,
         sanitized_content_hash=scan.sanitized_content_hash,
+        transformations=list(scan.transformations or []),
     )
     return ScanOut(
         scan_id=scan.id,

@@ -38,6 +38,7 @@ class Scan(Base):
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     redirect_chain: Mapped[list[Any] | None] = mapped_column(JSONType, nullable=True)
     score_explanation: Mapped[dict[str, Any] | None] = mapped_column(JSONType, nullable=True)
+    transformations: Mapped[list[Any] | None] = mapped_column(JSONType, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

@@ -17,23 +17,21 @@ In enforced mode, the agent must not directly consume unknown web content.
 ## Before you change code
 
 1. Read this file (`AGENTS.md`).
-2. Read `agent/STATUS.md`.
+2. Read local session files if present: `agent/STATUS.md`, `agent/HANDOFF.md`, `docs/TASKS.md` (gitignored — may exist only on your machine).
 3. Read `docs/DECISIONS.md`.
-4. Read `docs/TASKS.md`.
-5. Read docs relevant to the area you will touch.
-6. Inspect existing tests before changing behavior.
+4. Read docs relevant to the area you will touch (`docs/API_SPEC.md`, `docs/SECURITY_MODEL.md`, etc.).
+5. Inspect existing tests before changing behavior.
 
-Do not rely on chat history as project memory. Repository files are the durable source of truth.
+Durable **product/engineering** docs live in git (`docs/DECISIONS.md`, `docs/API_SPEC.md`, …). **Session planning** (handoff, status, sprints, task checklists, run logs) stays local — see `.gitignore`.
 
 ## After every meaningful work session
 
-1. Update `agent/STATUS.md`.
-2. Update `docs/TASKS.md`.
-3. Add architectural decisions to `docs/DECISIONS.md` when applicable.
-4. Create a run summary under `agent/runs/`.
-5. Document all tests executed and their results.
-6. Record incomplete work honestly.
-7. Leave a clear recommended next task in `agent/HANDOFF.md`.
+1. Update local `agent/STATUS.md` and `agent/HANDOFF.md` (not committed).
+2. Update local `docs/TASKS.md` / sprint files if you use them.
+3. Add architectural decisions to `docs/DECISIONS.md` when applicable (**commit** when API/architecture changes).
+4. Update `docs/API_SPEC.md` when the HTTP contract changes (**commit**).
+5. Create a run summary under `agent/runs/` (local only).
+6. Document tests executed; record incomplete work honestly.
 
 ## Agent boundaries
 

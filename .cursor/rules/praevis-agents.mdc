@@ -5,10 +5,10 @@ alwaysApply: true
 
 # Praevis agent rules
 
-Before changing code: read root `AGENTS.md`, `agent/STATUS.md`, `docs/DECISIONS.md`, `docs/TASKS.md`, and relevant docs/tests.
+Before changing code: read root `AGENTS.md`, `docs/DECISIONS.md`, relevant product docs/tests; optional local `agent/STATUS.md`, `agent/HANDOFF.md`, `docs/TASKS.md` (gitignored).
 
-After meaningful sessions: update `agent/STATUS.md`, `docs/TASKS.md`, `docs/DECISIONS.md` (if needed), `agent/runs/`, and `agent/HANDOFF.md`.
+After meaningful sessions: update local handoff/status/runs (gitignored); commit only product docs when contracts change (`docs/DECISIONS.md`, `docs/API_SPEC.md`).
 
-Do not commit secrets, weaken SSRF/safety checks, execute scanned-page JavaScript, or add LLMs where deterministic rules suffice.
+Do not commit secrets, local session docs, `var/artifacts/`, or `.env`. Do not weaken SSRF/safety checks, execute scanned-page JavaScript, or add LLMs where deterministic rules suffice.
 
 Codename `Praevis` is temporary — keep branding easy to replace.

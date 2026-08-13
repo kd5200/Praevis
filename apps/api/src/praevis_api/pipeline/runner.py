@@ -167,6 +167,7 @@ def run_scan_pipeline(
             score_explanation=scores.explanation,
             retrieved_at=fetched.retrieved_at,
             sanitized_content_hash=sanitized_content_hash,
+            transformations=list(extracted.transformations),
         )
     except (UrlNormalizationError, DestinationValidationError, FetchError) as exc:
         logger.warning(
@@ -227,4 +228,5 @@ def run_scan_pipeline(
             error_code=code,
             error_message=message,
             sanitized_content_hash=None,
+            transformations=[],
         )

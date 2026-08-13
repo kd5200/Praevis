@@ -50,6 +50,7 @@ class IntegrityOut(BaseModel):
 
     original_content_hash: str | None = None
     sanitized_content_hash: str | None = None
+    transformations: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class ScanOut(BaseModel):

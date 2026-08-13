@@ -49,12 +49,31 @@ class FetchResult:
 
 
 @dataclass(slots=True)
+class SanitizationTransformation:
+    """Record of a sanitization operation applied during extraction."""
+
+    type: str
+    target: str
+    reason: str
+    count: int = 1
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "type": self.type,
+            "target": self.target,
+            "reason": self.reason,
+            "count": self.count,
+        }
+
+
+@dataclass(slots=True)
 class ExtractedContent:
     title: str | None
     text: str
     html: str
     language: str | None
     metadata: dict[str, Any] = field(default_factory=dict)
+    transformations: list[SanitizationTransformation] = field(default_factory=list)
 
 
 @dataclass(slots=True)
@@ -85,3 +104,4 @@ class PipelineResult:
     error_message: str | None = None
     retrieved_at: datetime | None = None
     sanitized_content_hash: str | None = None
+    transformations: list[SanitizationTransformation] = field(default_factory=list)
