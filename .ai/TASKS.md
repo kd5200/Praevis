@@ -1,7 +1,6 @@
 # Project Task Notes
 
-Engineering backlog and notes.
-Canonical runnable tasks live in the AI Engineering Platform Task API.
+Notes only. Alfred assigns the work. Do not pick up items from this file as the queue.
 
 ## Backlog
 
