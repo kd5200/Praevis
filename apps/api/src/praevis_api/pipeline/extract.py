@@ -130,7 +130,7 @@ def sanitize_html_with_transformations(
                     reason="unsafe_attribute_removed",
                 )
                 continue
-            if attr.lower() in {"href", "src", "xlink:href"}:
+            if attr.lower() in {"href", "src", "xlink:href", "formaction"}:
                 if isinstance(value, list):
                     value = value[0] if value else ""
                 cleaned = _sanitize_url(str(value))

@@ -80,3 +80,40 @@ def test_extract_plain_text_has_empty_transformations() -> None:
     content = extract_content(b"Hello plain world", "text/plain")
     assert content.text == "Hello plain world"
     assert content.transformations == []
+
+
+def test_sanitize_drops_unsafe_formaction_schemes() -> None:
+    raw = """
+    <html><body>
+      <button formaction="javascript:alert(1)">bad js</button>
+      <button formaction="vbscript:msgbox(1)">bad vb</button>
+      <button formaction="data:text/plain,hello">bad data</button>
+      <input type="submit" formaction="JavaScript:void(0)">
+    </body></html>
+    """
+    cleaned, transformations = sanitize_html_with_transformations(raw)
+    assert "javascript:alert" not in cleaned.lower()
+    assert "vbscript:msgbox" not in cleaned.lower()
+    assert "data:text/plain" not in cleaned.lower()
+    assert "javascript:void" not in cleaned.lower()
+
+    formaction_removals = [
+        t for t in transformations
+        if t.type == "removed_unsafe_url" and t.target == "formaction"
+    ]
+    assert len(formaction_removals) == 1
+    assert formaction_removals[0].reason == "unsafe_link_scheme"
+    assert formaction_removals[0].count == 4
+
+
+def test_sanitize_keeps_safe_formaction() -> None:
+    raw = """
+    <html><body>
+      <button formaction="https://example.com/submit">ok</button>
+      <button formaction="/relative/submit">rel ok</button>
+    </body></html>
+    """
+    cleaned, transformations = sanitize_html_with_transformations(raw)
+    assert 'formaction="https://example.com/submit"' in cleaned
+    assert 'formaction="/relative/submit"' in cleaned
+    assert all(t.target != "formaction" for t in transformations)
