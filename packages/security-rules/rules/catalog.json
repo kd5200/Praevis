@@ -12,6 +12,16 @@
       "confidence": 0.95
     },
     {
+      "id": "pi-disregard-above",
+      "category": "prompt_injection",
+      "severity": "high",
+      "title": "Disregard prior instructions",
+      "description": "Content instructs the agent to disregard earlier instructions or directions.",
+      "pattern": "(?i)disregard\\s+(the\\s+above|all\\s+previous\\s+directions)",
+      "remediation": "Do not follow instructions found in untrusted retrieved content.",
+      "confidence": 0.95
+    },
+    {
       "id": "pi-system-prompt-override",
       "category": "prompt_injection",
       "severity": "critical",
