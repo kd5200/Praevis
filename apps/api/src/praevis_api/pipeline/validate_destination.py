@@ -36,10 +36,52 @@ def is_blocked_ip(ip: ipaddress.IPv4Address | ipaddress.IPv6Address) -> bool:
     return False
 
 
-def validate_ip_literal(host: str) -> None:
+def _parse_int_literal(part: str) -> int:
+    """Parse one legacy IPv4 part: decimal, octal (leading 0), or hex (0x)."""
+
+    if part.lower().startswith("0x"):
+        return int(part, 16)
+    if len(part) > 1 and part.startswith("0"):
+        return int(part, 8)
+    return int(part, 10)
+
+
+def _parse_legacy_ipv4(host: str) -> ipaddress.IPv4Address | None:
+    """Normalize inet_aton-style IPv4 spellings to an address.
+
+    Accepts 1-4 dot-separated parts where the final part holds the remaining
+    bits (e.g. ``127.1`` -> ``127.0.0.1``) and each part may be decimal,
+    octal (leading 0), or hex (0x). Returns None when the host is not a
+    legacy IPv4 spelling.
+    """
+
+    parts = host.split(".")
+    if not 1 <= len(parts) <= 4 or any(not part for part in parts):
+        return None
+    suffix_bits = {1: 32, 2: 24, 3: 16, 4: 8}[len(parts)]
+    value = 0
     try:
-        ip = ipaddress.ip_address(host)
+        for i, part in enumerate(parts):
+            parsed = _parse_int_literal(part)
+            bits = suffix_bits if i == len(parts) - 1 else 8
+            if parsed < 0 or parsed >= 1 << bits:
+                return None
+            value = (value << bits) | parsed
     except ValueError:
+        return None
+    return ipaddress.IPv4Address(value)
+
+
+def _coerce_ip_literal(host: str) -> ipaddress.IPv4Address | ipaddress.IPv6Address | None:
+    try:
+        return ipaddress.ip_address(host)
+    except ValueError:
+        return _parse_legacy_ipv4(host)
+
+
+def validate_ip_literal(host: str) -> None:
+    ip = _coerce_ip_literal(host)
+    if ip is None:
         return
     if is_blocked_ip(ip):
         raise DestinationValidationError(
