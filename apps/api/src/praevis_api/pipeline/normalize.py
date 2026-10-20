@@ -18,6 +18,7 @@ def normalize_url(raw: str) -> NormalizedUrl:
     """Validate and normalize a user-submitted URL.
 
     - Trim whitespace
+    - Reject ASCII control characters anywhere in the submitted string
     - Require http/https
     - Reject credentials in URL
     - Lowercase scheme/host
@@ -28,7 +29,13 @@ def normalize_url(raw: str) -> NormalizedUrl:
     if raw is None or not str(raw).strip():
         raise UrlNormalizationError("url_empty", "URL must not be empty")
 
-    candidate = str(raw).strip()
+    submitted = str(raw)
+    if any(ord(char) < 32 or ord(char) == 127 for char in submitted):
+        raise UrlNormalizationError(
+            "url_malformed", "URL must not contain ASCII control characters"
+        )
+
+    candidate = submitted.strip()
     parsed = urlparse(candidate)
 
     if not parsed.scheme or not parsed.netloc:
