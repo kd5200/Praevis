@@ -75,6 +75,25 @@ def calculate_scores(
     else:
         decision = "allow"
 
+    decision_reasons: list[str] = []
+    for detector in sorted({f.detector for f in findings if f.severity == "critical"}):
+        decision_reasons.append(f"critical finding from detector {detector}.")
+    if risk >= block_threshold:
+        decision_reasons.append(
+            f"risk score {risk} meets the block threshold ({block_threshold})."
+        )
+    elif risk >= warn_threshold:
+        decision_reasons.append(
+            f"risk score {risk} meets the warn threshold ({warn_threshold}) "
+            f"but not the block threshold ({block_threshold})."
+        )
+    else:
+        decision_reasons.append(
+            f"risk score {risk} is below the warn threshold ({warn_threshold}) "
+            f"and the block threshold ({block_threshold}); no warn or block "
+            f"threshold was met."
+        )
+
     explanation = {
         "category_weights": CATEGORY_WEIGHTS,
         "severity_multipliers": SEVERITY_MULTIPLIERS,
@@ -89,6 +108,7 @@ def calculate_scores(
         ],
         "thresholds": {"warn": warn_threshold, "block": block_threshold},
         "decision": decision,
+        "decision_reasons": decision_reasons,
     }
     return ScoreResult(
         risk_score=risk, trust_score=trust, decision=decision, explanation=explanation
