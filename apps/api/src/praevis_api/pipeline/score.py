@@ -68,12 +68,26 @@ def calculate_scores(
     trust -= int(risk * 0.6)
     trust = int(max(0, min(100, trust)))
 
-    if risk >= block_threshold or any(f.severity == "critical" for f in findings):
+    critical_findings = [f for f in findings if f.severity == "critical"]
+
+    if critical_findings:
         decision = "block"
+        reasons = [
+            f"critical finding {f.detector} forced the block"
+            for f in critical_findings
+        ]
+    elif risk >= block_threshold:
+        decision = "block"
+        reasons = [f"risk score {risk} crossed the block threshold {block_threshold}"]
     elif risk >= warn_threshold:
         decision = "warn"
+        reasons = [
+            f"risk score {risk} crossed the warn threshold {warn_threshold} "
+            f"but not the block threshold {block_threshold}"
+        ]
     else:
         decision = "allow"
+        reasons = ["no warn or block threshold met"]
 
     explanation = {
         "category_weights": CATEGORY_WEIGHTS,
@@ -89,6 +103,7 @@ def calculate_scores(
         ],
         "thresholds": {"warn": warn_threshold, "block": block_threshold},
         "decision": decision,
+        "decision_reasons": reasons,
     }
     return ScoreResult(
         risk_score=risk, trust_score=trust, decision=decision, explanation=explanation
